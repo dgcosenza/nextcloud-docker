@@ -1,12 +1,20 @@
 # Nextcloud — Debian 13 (trixie-slim) / NGINX 1.30 / PHP 8.4 FPM Image
 
 [![Daily Nextcloud image](https://github.com/dgcosenza/nextcloud-docker/actions/workflows/daily.yml/badge.svg)](https://github.com/dgcosenza/nextcloud-docker/actions/workflows/daily.yml)
+[![Packaging License: MIT](https://img.shields.io/badge/packaging-MIT-blue.svg)](https://github.com/dgcosenza/nextcloud-docker/blob/main/LICENSE)
+[![Upstream License: AGPL-3.0-or-later](https://img.shields.io/badge/upstream-AGPL--3.0--or--later-green.svg)](https://github.com/nextcloud/server/blob/master/COPYING)
+[![Signed with Cosign](https://img.shields.io/badge/signed-cosign%20OIDC-blueviolet.svg)](#supply-chain-verification)
+[![SLSA Level 3](https://img.shields.io/badge/SLSA-Level%203-brightgreen.svg)](#supply-chain-verification)
+[![Architectures](https://img.shields.io/badge/arch-amd64%20%7C%20arm64-informational.svg)](#supported-architectures)
+[![OpenSSF Scorecard](https://api.scorecard.dev/projects/github.com/dgcosenza/nextcloud-docker/badge)](https://scorecard.dev/viewer/?uri=github.com/dgcosenza/nextcloud-docker)
 [![Docker Pulls](https://img.shields.io/docker/pulls/dgcosenza/nextcloud)](https://hub.docker.com/r/dgcosenza/nextcloud)
 [![Docker Image Size](https://img.shields.io/docker/image-size/dgcosenza/nextcloud/latest)](https://hub.docker.com/r/dgcosenza/nextcloud)
+[![Latest Release](https://img.shields.io/github/v/release/dgcosenza/nextcloud-docker?label=version)](https://github.com/dgcosenza/nextcloud-docker/releases)
 
 A hardened, drop-in **Nextcloud** container image on **Debian 13 (`trixie-slim`)** combining the SHA-256-verified official Nextcloud server release, source-built **NGINX 1.30** (HTTP/3 QUIC + dynamically linked `ngx_brotli`), and **PHP 8.4 FPM**, maintained by **Daniel G. Cosenza from FNX Labs**.
 
 - **Docker Hub:** [`dgcosenza/nextcloud`](https://hub.docker.com/r/dgcosenza/nextcloud)
+- **GitHub Container Registry (GHCR):** [`ghcr.io/dgcosenza/nextcloud`](https://github.com/dgcosenza/nextcloud-docker/pkgs/container/nextcloud) (identical signed multi-arch digest)
 - **Source Repository:** [`dgcosenza/nextcloud-docker`](https://github.com/dgcosenza/nextcloud-docker)
 - **Upstream Application:** [`nextcloud/server`](https://github.com/nextcloud/server) (AGPL-3.0-or-later)
 - **Packaging License:** MIT (see [`LICENSE`](https://github.com/dgcosenza/nextcloud-docker/blob/main/LICENSE) and [`THIRD-PARTY-NOTICES.md`](https://github.com/dgcosenza/nextcloud-docker/blob/main/THIRD-PARTY-NOTICES.md))
@@ -58,10 +66,12 @@ image: dgcosenza/nextcloud:35.0.3@sha256:<digest>
 
 ## Supported Architectures
 
-| Architecture | Status | Notes |
+| Architecture | Status | Verification |
 | --- | --- | --- |
-| `linux/amd64` | **Published & tested** | Built, smoke-tested, scanned with Trivy and Grype, and published to Docker Hub (`dgcosenza/nextcloud`). |
+| `linux/amd64` | **Published & natively tested** | Built, smoke-tested, Dive-gated, Syft/Trivy/Grype-scanned, and Cosign-signed on native x86_64 CI runners. |
+| `linux/arm64` | **Published & natively tested** | Built, smoke-tested, Dive-gated, Syft/Trivy/Grype-scanned, and Cosign-signed on native ARM64 CI runners. |
 
+Identical multi-arch OCI manifest digests are published to **Docker Hub** and **GHCR** (`ghcr.io/dgcosenza/*`), accompanied by automated signed [GitHub Releases](https://github.com/dgcosenza/nextcloud-docker/releases).
 ---
 
 ## Quick Start
@@ -127,6 +137,39 @@ Probes Nextcloud's `/status.php` endpoint over local HTTPS.
 
 ---
 
+## Supply-Chain Verification
+
+Every published digest (multi-arch index and per-architecture manifests) on both Docker Hub and GHCR is keyless-signed with **Sigstore Cosign** (GitHub OIDC), attested with **SPDX** and **CycloneDX** SBOMs, and backed by **SLSA Build L3** provenance (`actions/attest-build-provenance`).
+
+### Verify image signature with Cosign
+
+```bash
+cosign verify \
+  --certificate-identity-regexp="^https://github\.com/dgcosenza/nextcloud-docker/\.github/workflows/daily\.yml@refs/heads/main$" \
+  --certificate-oidc-issuer="https://token.actions.githubusercontent.com" \
+  ghcr.io/dgcosenza/nextcloud:latest
+
+# Or against Docker Hub (identical digest):
+cosign verify \
+  --certificate-identity-regexp="^https://github\.com/dgcosenza/nextcloud-docker/\.github/workflows/daily\.yml@refs/heads/main$" \
+  --certificate-oidc-issuer="https://token.actions.githubusercontent.com" \
+  dgcosenza/nextcloud:latest
+```
+
+### Verify SPDX / CycloneDX SBOM attestations and SLSA Build Provenance
+
+```bash
+cosign verify-attestation \
+  --type spdxjson \
+  --certificate-identity-regexp="^https://github\.com/dgcosenza/nextcloud-docker/\.github/workflows/daily\.yml@refs/heads/main$" \
+  --certificate-oidc-issuer="https://token.actions.githubusercontent.com" \
+  ghcr.io/dgcosenza/nextcloud@sha256:<arch-digest>
+
+gh attestation verify oci://ghcr.io/dgcosenza/nextcloud:latest --owner dgcosenza
+```
+
+---
+
 ## Security
 
 - **Vulnerability scan policy:** Every CI build runs **Trivy** (table, JSON, SARIF upload, blocking `--ignore-unfixed` gate) and **Grype** (`--only-fixed`, severity cutoff `high`, blocking gate), plus emits an **SPDX SBOM** (`sbom.spdx.json`) and provenance artifact.
@@ -181,9 +224,11 @@ docker buildx build \
 
 ---
 
-## License and Credits
+## License
 
-- **Container packaging, entrypoint, CI, and documentation:** [MIT License](https://github.com/dgcosenza/nextcloud-docker/blob/main/LICENSE) — maintained by **Daniel G. Cosenza from FNX Labs**.
-- **Nextcloud Server:** AGPL-3.0-or-later ([`nextcloud/server`](https://github.com/nextcloud/server)).
-- Full third-party notices: [`THIRD-PARTY-NOTICES.md`](https://github.com/dgcosenza/nextcloud-docker/blob/main/THIRD-PARTY-NOTICES.md).
-- Release history: [`CHANGELOG.md`](https://github.com/dgcosenza/nextcloud-docker/blob/main/CHANGELOG.md).
+This repository follows a clear packaging-vs-upstream license split:
+
+- **Container packaging, scripts, CI workflows, and documentation (`packaging: MIT`):** Licensed under the [MIT License](https://github.com/dgcosenza/nextcloud-docker/blob/main/LICENSE) — copyright **Daniel G. Cosenza from FNX Labs**.
+- **Bundled upstream software — Nextcloud Server (`nextcloud/server`) (`upstream: AGPL-3.0-or-later`):** Nextcloud Server is licensed under the [GNU Affero General Public License v3.0 or later (`AGPL-3.0-or-later`)](https://github.com/nextcloud/server/blob/master/COPYING). Bundled NGINX and `ngx_brotli` are BSD-2-Clause; PHP 8.4 is PHP-3.01.
+
+Full third-party notices are maintained in [`THIRD-PARTY-NOTICES.md`](https://github.com/dgcosenza/nextcloud-docker/blob/main/THIRD-PARTY-NOTICES.md). Release history is maintained in [`CHANGELOG.md`](https://github.com/dgcosenza/nextcloud-docker/blob/main/CHANGELOG.md).
