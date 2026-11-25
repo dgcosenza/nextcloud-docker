@@ -19,7 +19,7 @@ on:
       nginx_version:
         description: 'Override official NGINX stable version (leave empty for latest stable from nginx.org)'
         required: false
-        default: ''r
+        default: ''
 
 permissions: {}
 
@@ -31,7 +31,7 @@ env:
   IMAGE_NAME: dgcosenza/nextcloud
   NEXTCLOUD_VERSION_DEFAULT: '35.0.3'
   NGINX_VERSION_DEFAULT: '1.30.8'
-  NGX_BROTLI_COMMIT: '53e0fb55f250f48fe80c0ddbf6c0f7103cdbaae1'r
+  NGX_BROTLI_COMMIT: '53e0fb55f250f48fe80c0ddbf6c0f7103cdbaae1'
 
 jobs:
   public-check:
@@ -105,7 +105,7 @@ jobs:
       base_digest: ${{ steps.resolve.outputs.base_digest }}
       build_date: ${{ steps.resolve.outputs.build_date }}
       build_date_iso: ${{ steps.resolve.outputs.build_date_iso }}
-      created: ${{ steps.resolve.outputs.created }}r
+      created: ${{ steps.resolve.outputs.created }}
     steps:
       - name: Checkout repository
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
@@ -118,7 +118,7 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
           INPUT_NC: ${{ inputs.nextcloud_version }}
-          INPUT_NGINX: ${{ inputs.nginx_version }}r
+          INPUT_NGINX: ${{ inputs.nginx_version }}
         run: |
           set -euo pipefail
 
@@ -179,7 +179,7 @@ jobs:
             echo "build_date=${BUILD_DATE}"
             echo "build_date_iso=${BUILD_DATE_ISO}"
             echo "created=${CREATED}"
-          } >> "$GITHUB_OUTPUT" r
+          } >> "$GITHUB_OUTPUT" 
 
       - name: Upload upstream changes artifact
         uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
@@ -239,7 +239,7 @@ jobs:
             NGX_BROTLI_COMMIT=${{ env.NGX_BROTLI_COMMIT }}
             BUILD_DATE=${{ needs.resolve.outputs.created }}
             IMAGE_REVISION=${{ github.sha }}
-            IMAGE_SOURCE=https://github.com/${{ github.repository }}r
+            IMAGE_SOURCE=https://github.com/${{ github.repository }}
 
       - name: Inspect OS version and image size
         id: inspect_image
@@ -256,7 +256,7 @@ jobs:
           echo "size_bytes=${SIZE_BYTES}" >> "$GITHUB_OUTPUT"
           echo "size_mb=${SIZE_MB}" >> "$GITHUB_OUTPUT"
           EXTRA_VER="$(docker run --rm --entrypoint php "$IMG" -r 'echo PHP_VERSION;' | tr -d '\r\n')"
-          echo "extra_version=${EXTRA_VER}" >> "$GITHUB_OUTPUT" r
+          echo "extra_version=${EXTRA_VER}" >> "$GITHUB_OUTPUT" 
           echo "Detected (${ARCH}): Debian=${DEBIAN_VERSION}, Size=${SIZE_MB} MB (${SIZE_BYTES} bytes)"
           echo "### Image size (${ARCH}): **${SIZE_MB} MB** (${SIZE_BYTES} bytes)" >> "$GITHUB_STEP_SUMMARY"
 
@@ -391,7 +391,7 @@ jobs:
             NGX_BROTLI_COMMIT=${{ env.NGX_BROTLI_COMMIT }}
             BUILD_DATE=${{ needs.resolve.outputs.created }}
             IMAGE_REVISION=${{ github.sha }}
-            IMAGE_SOURCE=https://github.com/${{ github.repository }}r
+            IMAGE_SOURCE=https://github.com/${{ github.repository }}
 
       - name: Record per-arch metadata
         shell: bash
@@ -682,7 +682,7 @@ jobs:
             --arg upstream_version "${{ needs.resolve.outputs.upstream_version }}" \
             --arg upstream_commit "" \
             --arg nginx_version "${{ needs.resolve.outputs.nginx_version }}" \
-            --arg php_version "$(jq -r '.extra_version // "8.4"' .ci-in/arch-artifacts-amd64/arch-meta-amd64.json)" \\r
+            --arg php_version "$(jq -r '.extra_version // "8.4"' .ci-in/arch-artifacts-amd64/arch-meta-amd64.json)" \
             --arg debian_version "${DEBIAN_VER}" \
             --arg base_digest "${{ needs.resolve.outputs.base_digest }}" \
             --arg build_date "${{ needs.resolve.outputs.build_date_iso }}" \
@@ -708,7 +708,7 @@ jobs:
                 "Nextcloud": $upstream_version,
                 "NGINX": $nginx_version,
                 "PHP-FPM": $php_version,
-                "Base OS": ("Debian " + $debian_version + " (trixie-slim)")r
+                "Base OS": ("Debian " + $debian_version + " (trixie-slim)")
               },
               base_image: "debian:trixie-slim",
               base_digest: $base_digest,
@@ -861,4 +861,3 @@ jobs:
           else
             echo "All jobs succeeded and no open ci-failure issue exists."
           fi
-r
