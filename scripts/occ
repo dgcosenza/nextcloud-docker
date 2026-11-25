@@ -1,0 +1,8 @@
+#!/usr/bin/env bash
+set -euo pipefail
+if [ "$(id -u)" -eq 0 ]; then
+  exec setpriv --reuid="$(id -u abc)" --regid="$(id -g abc)" --init-groups \
+    env HOME=/config USER=abc php /app/www/public/occ "$@"
+else
+  exec php /app/www/public/occ "$@"
+fi

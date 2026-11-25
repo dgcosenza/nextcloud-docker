@@ -1,0 +1,189 @@
+# Nextcloud — Debian 13 (trixie-slim) / NGINX 1.30 / PHP 8.4 FPM Image
+
+[![Daily Nextcloud image](https://github.com/dgcosenza/nextcloud-docker/actions/workflows/daily.yml/badge.svg)](https://github.com/dgcosenza/nextcloud-docker/actions/workflows/daily.yml)
+[![Docker Pulls](https://img.shields.io/docker/pulls/dgcosenza/nextcloud)](https://hub.docker.com/r/dgcosenza/nextcloud)
+[![Docker Image Size](https://img.shields.io/docker/image-size/dgcosenza/nextcloud/latest)](https://hub.docker.com/r/dgcosenza/nextcloud)
+
+A hardened, drop-in **Nextcloud** container image on **Debian 13 (`trixie-slim`)** combining the SHA-256-verified official Nextcloud server release, source-built **NGINX 1.30** (HTTP/3 QUIC + dynamically linked `ngx_brotli`), and **PHP 8.4 FPM**, maintained by **Daniel G. Cosenza from FNX Labs**.
+
+- **Docker Hub:** [`dgcosenza/nextcloud`](https://hub.docker.com/r/dgcosenza/nextcloud)
+- **Source Repository:** [`dgcosenza/nextcloud-docker`](https://github.com/dgcosenza/nextcloud-docker)
+- **Upstream Application:** [`nextcloud/server`](https://github.com/nextcloud/server) (AGPL-3.0-or-later)
+- **Packaging License:** MIT (see [`LICENSE`](https://github.com/dgcosenza/nextcloud-docker/blob/main/LICENSE) and [`THIRD-PARTY-NOTICES.md`](https://github.com/dgcosenza/nextcloud-docker/blob/main/THIRD-PARTY-NOTICES.md))
+
+---
+
+## Overview
+
+`dgcosenza/nextcloud` packages the latest official Nextcloud release on fully upgraded **Debian 13 (`trixie-slim`)**:
+
+- **Drop-in `/config` and `/data` compatibility:** Preserves `PUID`/`PGID` (user `abc`), `/app/www/public` symlinked to `/config/www/nextcloud/{apps,config,themes}`, `/config/nginx/` (supporting HTTP/3 `quic` and `brotli`), `/config/keys/cert.{crt,key}`, `/config/php/{php-local.ini,www2.conf}`, `/data`, and the `occ` CLI helper (`/usr/local/bin/occ`).
+- **Full PHP 8.4 & media stack:** Ships PHP 8.4 FPM with `apcu`, `bcmath`, `bz2`, `curl`, `gd`, `gmp`, `igbinary`, `imagick`, `intl`, `ldap`, `mbstring`, `memcached`, `msgpack`, `mysql`, `pgsql`, `redis`, `smbclient`, `soap`, `sqlite3`, `xml`, `xsl`, `zip`, plus `ffmpeg`, `imagemagick`, and `smbclient`.
+- **Downgrade protection & background cron:** Refuses to start if mounted data is newer than the image release, runs `occ upgrade` automatically on core upgrades, and executes `cron.php` every 5 minutes as non-root `abc` without needing setuid `crond` (100% compatible with `security_opt: no-new-privileges:true`).
+- **`notify_push` sidecar compatible:** Works seamlessly with Nextcloud `notify_push` sidecar containers overriding the entrypoint against the shared `/config` volume.
+
+---
+
+## Current Versions
+
+<!-- versions:start -->
+| Component | Resolved Version |
+| --- | --- |
+| Nextcloud | `35.0.3` |
+| NGINX | `1.30.8` |
+| PHP-FPM | `8.4` |
+| Base OS | `Debian 13.8 (trixie-slim)` |
+| Last verified build (UTC) | `2026-11-24` |
+| Security gate (Trivy + Grype) | **0 fixable Critical/High** (0 upstream-unfixed) |
+<!-- versions:end -->
+
+---
+
+## Supported Tags
+
+| Tag | Policy | Description |
+| --- | --- | --- |
+| `<version>-<YYYYMMDD>` (e.g. `35.0.3-20261124`) | **Immutable** | Date-stamped daily rebuild pinning the Nextcloud release and UTC build date. |
+| `sha-<short>` | **Immutable** | Packaging repository Git commit tag. |
+| `<version>` (e.g. `35.0.3`) | Moving | Latest verified Debian 13 security rebuild of that Nextcloud release. |
+| `latest` | Moving | Latest verified build tracking the newest official Nextcloud release. |
+
+**Production pinning:** Pin by registry digest (and review major Nextcloud upgrades before bumping):
+
+```yaml
+image: dgcosenza/nextcloud:35.0.3@sha256:<digest>
+```
+
+---
+
+## Supported Architectures
+
+| Architecture | Status | Notes |
+| --- | --- | --- |
+| `linux/amd64` | **Published & tested** | Built, smoke-tested, scanned with Trivy and Grype, and published to Docker Hub (`dgcosenza/nextcloud`). |
+
+---
+
+## Quick Start
+
+See [`docker-compose.example.yml`](https://github.com/dgcosenza/nextcloud-docker/blob/main/docker-compose.example.yml):
+
+```bash
+docker run -d \
+  --name nextcloud \
+  --restart unless-stopped \
+  --security-opt no-new-privileges:true \
+  -p 192.0.2.10:8084:443 \
+  -e PUID=1000 \
+  -e PGID=1000 \
+  -e TZ=Etc/UTC \
+  -v "$(pwd)/config:/config" \
+  -v "$(pwd)/data:/data" \
+  dgcosenza/nextcloud:latest
+```
+
+---
+
+## Configuration
+
+### Environment Variables
+
+| Variable | Required | Default | Description |
+| --- | --- | --- | --- |
+| `PUID` | No | `1000` | UID assigned to the `abc` NGINX/PHP-FPM/cron user. |
+| `PGID` | No | `1000` | GID assigned to the `abc` group. |
+| `TZ` | No | `Etc/UTC` | Container timezone (IANA timezone name). |
+| `NEXTCLOUD_CRON_INTERVAL` | No | `300` | Seconds between `php -f /app/www/public/cron.php` runs (`0` disables the internal loop). |
+
+### Volumes, Ports, and UID/GID
+
+| Path / Port | Mode / Owner | Purpose |
+| --- | --- | --- |
+| `/config` | `PUID:PGID` (`abc`) | Persistent Nextcloud `www/nextcloud/{config,apps,themes}`, `nginx/`, `keys/`, `php/`, and `log/`. |
+| `/data` | `PUID:PGID` (`abc`) | Persistent Nextcloud user file storage. |
+| `80/tcp`, `443/tcp` | Container ports | HTTP and HTTPS/HTTP3 listeners. |
+
+Run administrative commands via `docker exec nextcloud occ status`.
+
+---
+
+## Healthcheck
+
+```dockerfile
+HEALTHCHECK --interval=30s --timeout=10s --start-period=180s --retries=3 \
+    CMD ["sh", "-c", "curl -fsSk https://127.0.0.1:443/status.php >/dev/null || exit 1"]
+```
+
+Probes Nextcloud's `/status.php` endpoint over local HTTPS.
+
+---
+
+## Upgrading and Migrating from `lscr.io/linuxserver/nextcloud`
+
+1. **Always back up first:** Dump the Nextcloud database (`mariadb-dump` / `mysqldump`) and archive `./config` (and snapshot `./data`).
+2. Tag your outgoing image for rollback.
+3. Verify the target image's Nextcloud version is equal to or one major/minor step ahead of your installed `config.php` version (never downgrade or skip multiple major releases).
+4. Pin `image: dgcosenza/nextcloud:<version>@sha256:<digest>` on `nextcloud` (and any `notify_push` sidecar sharing the image), recreate with `docker compose up -d --no-deps nextcloud notify_push`, and verify `occ status`, `/status.php`, and `notify_push` health.
+
+---
+
+## Security
+
+- **Vulnerability scan policy:** Every CI build runs **Trivy** (table, JSON, SARIF upload, blocking `--ignore-unfixed` gate) and **Grype** (`--only-fixed`, severity cutoff `high`, blocking gate), plus emits an **SPDX SBOM** (`sbom.spdx.json`) and provenance artifact.
+- **Current status:** **0 fixable Critical/High** vulnerabilities across Debian 13 OS packages, PHP 8.4, NGINX 1.30, and Nextcloud.
+- **Hardening:** `tini` PID 1, `no-new-privileges:true` compatible via `setpriv`, workers and background cron run as non-root `abc`, compilers excluded from runtime layer, built-in Nextcloud self-updater removed.
+- See [`SECURITY.md`](https://github.com/dgcosenza/nextcloud-docker/blob/main/SECURITY.md).
+
+---
+
+## Build Locally
+
+```bash
+git clone https://github.com/dgcosenza/nextcloud-docker.git
+cd nextcloud-docker
+
+docker buildx build \
+  --platform linux/amd64 \
+  --load \
+  --build-arg BUILD_DATE="$(date -u +%Y-%m-%dT%H:%M:%SZ)" \
+  --build-arg IMAGE_REVISION="$(git rev-parse HEAD)" \
+  -t dgcosenza/nextcloud:local \
+  .
+```
+
+| Build Arg | Default | Purpose |
+| --- | --- | --- |
+| `NEXTCLOUD_VERSION` | `35.0.3` | Official Nextcloud release version (SHA-256 verified, overridden daily by CI). |
+| `NGINX_VERSION` | `1.30.8` | Official stable NGINX release from `nginx.org` (overridden daily by CI). |
+| `NGX_BROTLI_COMMIT` | `53e0fb55f250f48fe80c0ddbf6c0f7103cdbaae1` | Pinned `google/ngx_brotli` commit SHA. |
+| `DEBIAN_BASE` | `debian:trixie-slim` | Base OS image. |
+
+---
+
+## Update Policy
+
+[`.github/workflows/daily.yml`](https://github.com/dgcosenza/nextcloud-docker/blob/main/.github/workflows/daily.yml) runs automatically every day at **04:53 UTC**, on pushes to `main`, on pull requests (verification only), and via `workflow_dispatch`. Every scheduled run executes a seven-step automated pipeline (gated by `.github/workflows/public-check.yml`):
+
+1. **Upstream check:** Queries `nextcloud/server` latest stable release via the authenticated GitHub API, resolves latest stable NGINX from `nginx.org` and the `debian:trixie-slim` base digest, diffs against `versions.json`, and emits `upstream-changes.md`.
+2. **No-cache rebuild:** Rebuilds `linux/amd64` with `--no-cache` on schedule, verifies the Nextcloud tarball SHA-256, compiles NGINX + `ngx_brotli`, upgrades Debian 13 + PHP 8.4 packages, and emits an **SPDX SBOM** (`sbom.spdx.json`) and provenance artifact.
+3. **Vulnerability fix and gate:** Runs **Trivy** (table, JSON, SARIF upload, blocking `--ignore-unfixed` gate) and **Grype** (blocking `--only-fixed` gate, severity cutoff `high`), diffs findings against the previous scan, and retains reports for 90 days.
+4. **Smoke test:** Runs [`tests/smoke.sh`](https://github.com/dgcosenza/nextcloud-docker/blob/main/tests/smoke.sh) to verify fresh Nextcloud hydration, `tini` PID 1, non-root `abc` NGINX & PHP 8.4 FPM workers, HTTPS `/status.php`, `occ status`, and a negative closed-port healthcheck test.
+5. **Publish:** On non-PR builds when Docker Hub secrets are configured, pushes `latest`, `<version>`, `<version>-<YYYYMMDD>`, and `sha-<short>` tags to Docker Hub and records the immutable digest.
+6. **Automated documentation sync:** Commits updated `versions.json`, the README `Current Versions` block, and a dated `CHANGELOG.md` entry via `github-actions[bot]` with `[skip ci]` when content changes, then syncs the Docker Hub overview via `peter-evans/dockerhub-description`.
+7. **Failure alerting:** On failure, CI opens or updates a single GitHub issue labeled `ci-failure` with the failing job and run link, and auto-closes it on the next green run.
+
+---
+
+## Design Decisions
+
+- **Debian 13 (`trixie-slim`) + PHP 8.4 + source-built NGINX 1.30:** Nextcloud 35 officially supports PHP 8.3–8.5; Debian 13's PHP 8.4 receives daily Debian Security patches, while source-built NGINX 1.30 provides HTTP/3 QUIC and dynamically linked `ngx_brotli`.
+- **In-process cron loop via `setpriv`:** Runs `cron.php` every 5 minutes as UID/GID `PUID:PGID` without requiring root `crond` or disabling `no-new-privileges:true`.
+
+---
+
+## License and Credits
+
+- **Container packaging, entrypoint, CI, and documentation:** [MIT License](https://github.com/dgcosenza/nextcloud-docker/blob/main/LICENSE) — maintained by **Daniel G. Cosenza from FNX Labs**.
+- **Nextcloud Server:** AGPL-3.0-or-later ([`nextcloud/server`](https://github.com/nextcloud/server)).
+- Full third-party notices: [`THIRD-PARTY-NOTICES.md`](https://github.com/dgcosenza/nextcloud-docker/blob/main/THIRD-PARTY-NOTICES.md).
+- Release history: [`CHANGELOG.md`](https://github.com/dgcosenza/nextcloud-docker/blob/main/CHANGELOG.md).
