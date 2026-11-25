@@ -19,7 +19,7 @@ on:
       nginx_version:
         description: 'Override official NGINX stable version (leave empty for latest stable from nginx.org)'
         required: false
-        default: ''
+        default: ''r
 
 permissions: {}
 
@@ -31,7 +31,7 @@ env:
   IMAGE_NAME: dgcosenza/nextcloud
   NEXTCLOUD_VERSION_DEFAULT: '35.0.3'
   NGINX_VERSION_DEFAULT: '1.30.8'
-  NGX_BROTLI_COMMIT: '53e0fb55f250f48fe80c0ddbf6c0f7103cdbaae1'
+  NGX_BROTLI_COMMIT: '53e0fb55f250f48fe80c0ddbf6c0f7103cdbaae1'r
 
 jobs:
   public-check:
@@ -105,7 +105,7 @@ jobs:
       base_digest: ${{ steps.resolve.outputs.base_digest }}
       build_date: ${{ steps.resolve.outputs.build_date }}
       build_date_iso: ${{ steps.resolve.outputs.build_date_iso }}
-      created: ${{ steps.resolve.outputs.created }}
+      created: ${{ steps.resolve.outputs.created }}r
     steps:
       - name: Checkout repository
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
@@ -118,11 +118,15 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
           INPUT_NC: ${{ inputs.nextcloud_version }}
-          INPUT_NGINX: ${{ inputs.nginx_version }}
+          INPUT_NGINX: ${{ inputs.nginx_version }}r
         run: |
           set -euo pipefail
 
-          RELEASE_JSON="$(curl -fsSL             -H 'Accept: application/vnd.github+json'             -H "Authorization: Bearer $GH_TOKEN"             -H 'X-GitHub-Api-Version: 2022-11-28'             https://api.github.com/repos/nextcloud/server/releases/latest)"
+          RELEASE_JSON="$(curl -fsSL \
+            -H 'Accept: application/vnd.github+json' \
+            -H "Authorization: Bearer $GH_TOKEN" \
+            -H 'X-GitHub-Api-Version: 2022-11-28' \
+            https://api.github.com/repos/nextcloud/server/releases/latest)"
 
           NC_VER="${INPUT_NC}"
           if [ -z "$NC_VER" ]; then
@@ -133,7 +137,9 @@ jobs:
 
           NGINX_VER="${INPUT_NGINX}"
           if [ -z "$NGINX_VER" ]; then
-            NGINX_VER="$(curl -fsSL https://nginx.org/packages/debian/dists/trixie/nginx/binary-amd64/Packages               | awk '/^Package: nginx$/{p=1} p && /^Version:/{print $2; p=0}'               | sed 's/-.*//' | sort -Vu | tail -n 1)"
+            NGINX_VER="$(curl -fsSL https://nginx.org/packages/debian/dists/trixie/nginx/binary-amd64/Packages \
+              | awk '/^Package: nginx$/{p=1} p && /^Version:/{print $2; p=0}' \
+              | sed 's/-.*//' | sort -Vu | tail -n 1)"
           fi
           NGINX_VER="${NGINX_VER:-${NGINX_VERSION_DEFAULT}}"
 
@@ -154,8 +160,7 @@ jobs:
             if [ -n "$PREV_VER" ] && [ "$PREV_VER" != "$NC_VER" ]; then
               echo "- Nextcloud updated from ${PREV_VER} to ${NC_VER}."
               if [ -n "$RELEASE_BODY" ]; then
-                printf '%s
-' "$RELEASE_BODY" | grep -E '^[[:space:]]*[-*][[:space:]]+' | head -n 5 || true
+                printf '%s\n' "$RELEASE_BODY" | grep -E '^[[:space:]]*[-*][[:space:]]+' | head -n 5 || true
               fi
             fi
             if [ -n "$PREV_NGINX" ] && [ "$PREV_NGINX" != "$NGINX_VER" ]; then
@@ -174,7 +179,7 @@ jobs:
             echo "build_date=${BUILD_DATE}"
             echo "build_date_iso=${BUILD_DATE_ISO}"
             echo "created=${CREATED}"
-          } >> "$GITHUB_OUTPUT" 
+          } >> "$GITHUB_OUTPUT" r
 
       - name: Upload upstream changes artifact
         uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
@@ -234,7 +239,7 @@ jobs:
             NGX_BROTLI_COMMIT=${{ env.NGX_BROTLI_COMMIT }}
             BUILD_DATE=${{ needs.resolve.outputs.created }}
             IMAGE_REVISION=${{ github.sha }}
-            IMAGE_SOURCE=https://github.com/${{ github.repository }}
+            IMAGE_SOURCE=https://github.com/${{ github.repository }}r
 
       - name: Inspect OS version and image size
         id: inspect_image
@@ -251,7 +256,7 @@ jobs:
           echo "size_bytes=${SIZE_BYTES}" >> "$GITHUB_OUTPUT"
           echo "size_mb=${SIZE_MB}" >> "$GITHUB_OUTPUT"
           EXTRA_VER="$(docker run --rm --entrypoint php "$IMG" -r 'echo PHP_VERSION;' | tr -d '\r\n')"
-          echo "extra_version=${EXTRA_VER}" >> "$GITHUB_OUTPUT" 
+          echo "extra_version=${EXTRA_VER}" >> "$GITHUB_OUTPUT" r
           echo "Detected (${ARCH}): Debian=${DEBIAN_VERSION}, Size=${SIZE_MB} MB (${SIZE_BYTES} bytes)"
           echo "### Image size (${ARCH}): **${SIZE_MB} MB** (${SIZE_BYTES} bytes)" >> "$GITHUB_STEP_SUMMARY"
 
@@ -386,7 +391,7 @@ jobs:
             NGX_BROTLI_COMMIT=${{ env.NGX_BROTLI_COMMIT }}
             BUILD_DATE=${{ needs.resolve.outputs.created }}
             IMAGE_REVISION=${{ github.sha }}
-            IMAGE_SOURCE=https://github.com/${{ github.repository }}
+            IMAGE_SOURCE=https://github.com/${{ github.repository }}r
 
       - name: Record per-arch metadata
         shell: bash
@@ -514,7 +519,9 @@ jobs:
           for t in "${TAGS[@]}"; do
             [ -n "$t" ] && ARGS+=(-t "ghcr.io/${IMAGE_NAME}:${t}")
           done
-          docker buildx imagetools create "${ARGS[@]}"             "ghcr.io/${IMAGE_NAME}@${DIG_AMD64}"             "ghcr.io/${IMAGE_NAME}@${DIG_ARM64}"
+          docker buildx imagetools create "${ARGS[@]}" \
+            "ghcr.io/${IMAGE_NAME}@${DIG_AMD64}" \
+            "ghcr.io/${IMAGE_NAME}@${DIG_ARM64}"
 
           INDEX_DIGEST="$(crane digest "ghcr.io/${IMAGE_NAME}:latest")"
           echo "GHCR multi-arch index digest: ${INDEX_DIGEST}"
@@ -630,7 +637,7 @@ jobs:
           ### Cosign Verification
           \`\`\`bash
           cosign verify \
-            --certificate-identity-regexp="^https://github\.com/${GITHUB_REPOSITORY}/\.github/workflows/daily\.yml@refs/heads/main$" \
+            --certificate-identity-regexp="^https://github\\.com/${GITHUB_REPOSITORY}/\\.github/workflows/daily\\.yml@refs/heads/main$" \
             --certificate-oidc-issuer="https://token.actions.githubusercontent.com" \
             ghcr.io/${IMAGE_NAME}@${INDEX_DIGEST}
           \`\`\`
@@ -638,9 +645,17 @@ jobs:
 
           if gh release view "$TAG" -R "$GITHUB_REPOSITORY" >/dev/null 2>&1; then
             gh release edit "$TAG" -R "$GITHUB_REPOSITORY" --title "Nextcloud ${VER} (${TAG})" --notes-file .rel/notes.md
-            gh release upload "$TAG" -R "$GITHUB_REPOSITORY" --clobber               .rel/checksums.txt .rel/checksums.txt.sigstore.json               .rel/sbom-amd64.spdx.json .rel/sbom-amd64.cdx.json               .rel/sbom-arm64.spdx.json .rel/sbom-arm64.cdx.json
+            gh release upload "$TAG" -R "$GITHUB_REPOSITORY" --clobber \
+              .rel/checksums.txt .rel/checksums.txt.sigstore.json \
+              .rel/sbom-amd64.spdx.json .rel/sbom-amd64.cdx.json \
+              .rel/sbom-arm64.spdx.json .rel/sbom-arm64.cdx.json
           else
-            gh release create "$TAG" -R "$GITHUB_REPOSITORY"               --title "Nextcloud ${VER} (${TAG})"               --notes-file .rel/notes.md               .rel/checksums.txt .rel/checksums.txt.sigstore.json               .rel/sbom-amd64.spdx.json .rel/sbom-amd64.cdx.json               .rel/sbom-arm64.spdx.json .rel/sbom-arm64.cdx.json
+            gh release create "$TAG" -R "$GITHUB_REPOSITORY" \
+              --title "Nextcloud ${VER} (${TAG})" \
+              --notes-file .rel/notes.md \
+              .rel/checksums.txt .rel/checksums.txt.sigstore.json \
+              .rel/sbom-amd64.spdx.json .rel/sbom-amd64.cdx.json \
+              .rel/sbom-arm64.spdx.json .rel/sbom-arm64.cdx.json
           fi
 
       - name: Build updated versions metadata
@@ -667,7 +682,7 @@ jobs:
             --arg upstream_version "${{ needs.resolve.outputs.upstream_version }}" \
             --arg upstream_commit "" \
             --arg nginx_version "${{ needs.resolve.outputs.nginx_version }}" \
-            --arg php_version "$(jq -r '.extra_version // "8.4"' .ci-in/arch-artifacts-amd64/arch-meta-amd64.json)" \
+            --arg php_version "$(jq -r '.extra_version // "8.4"' .ci-in/arch-artifacts-amd64/arch-meta-amd64.json)" \\r
             --arg debian_version "${DEBIAN_VER}" \
             --arg base_digest "${{ needs.resolve.outputs.base_digest }}" \
             --arg build_date "${{ needs.resolve.outputs.build_date_iso }}" \
@@ -693,7 +708,7 @@ jobs:
                 "Nextcloud": $upstream_version,
                 "NGINX": $nginx_version,
                 "PHP-FPM": $php_version,
-                "Base OS": ("Debian " + $debian_version + " (trixie-slim)")
+                "Base OS": ("Debian " + $debian_version + " (trixie-slim)")r
               },
               base_image: "debian:trixie-slim",
               base_digest: $base_digest,
@@ -846,3 +861,4 @@ jobs:
           else
             echo "All jobs succeeded and no open ci-failure issue exists."
           fi
+r
