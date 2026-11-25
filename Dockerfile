@@ -88,7 +88,8 @@ RUN set -eux; \
     mkdir -p /app/www/src; \
     curl -fsSLo /tmp/nextcloud.tar.bz2 "https://download.nextcloud.com/server/releases/nextcloud-${NEXTCLOUD_VERSION}.tar.bz2"; \
     curl -fsSLo /tmp/nextcloud.tar.bz2.sha256 "https://download.nextcloud.com/server/releases/nextcloud-${NEXTCLOUD_VERSION}.tar.bz2.sha256"; \
-    EXPECTED_SHA="$(awk '{print $1}' /tmp/nextcloud.tar.bz2.sha256)"; \
+    EXPECTED_SHA="$(awk -v f="nextcloud-${NEXTCLOUD_VERSION}.tar.bz2" '$2 == f {print $1; exit}' /tmp/nextcloud.tar.bz2.sha256)"; \
+    test -n "${EXPECTED_SHA}"; \
     echo "${EXPECTED_SHA}  /tmp/nextcloud.tar.bz2" | sha256sum -c -; \
     tar -xjf /tmp/nextcloud.tar.bz2 -C /app/www/src --strip-components=1; \
     rm -rf /app/www/src/updater /tmp/nextcloud.tar.bz2 /tmp/nextcloud.tar.bz2.sha256; \
