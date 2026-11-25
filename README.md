@@ -42,10 +42,10 @@ A hardened, drop-in **Nextcloud** container image on **Debian 13 (`trixie-slim`)
 | PHP-FPM | `8.4.28` |
 | Base OS | `Debian 13.8 (trixie-slim)` |
 | Architectures | `linux/amd64, linux/arm64` |
-| Uncompressed size (per arch) | `amd64: 533.7 MB, arm64: 1490.7 MB` |
+| Uncompressed size (per arch) | `amd64: 534.5 MB, arm64: 1493.3 MB` |
 | Last verified build (UTC) | `2026-11-25` |
-| Published multi-arch digest | `dgcosenza/nextcloud@sha256:98dc60b10d0a7db59437b9824ef99b1693eb0b8d19d581d234ece3ee05661a0c` |
-| GHCR mirror | `ghcr.io/dgcosenza/nextcloud@sha256:98dc60b10d0a7db59437b9824ef99b1693eb0b8d19d581d234ece3ee05661a0c` |
+| Published multi-arch digest | `dgcosenza/nextcloud@sha256:ca9cae41f1560e448fb7e0c09ea0e75874a4d4567dcb7757cc3988fe7cda29b9` |
+| GHCR mirror | `ghcr.io/dgcosenza/nextcloud@sha256:ca9cae41f1560e448fb7e0c09ea0e75874a4d4567dcb7757cc3988fe7cda29b9` |
 | Supply chain | Cosign OIDC signed + SPDX & CycloneDX SBOM attestations + SLSA Build L3 provenance |
 | Security gate (Trivy + Grype on SBOM) | **0 fixable Critical/High** (72 upstream-unfixed) |
 <!-- versions:end -->
