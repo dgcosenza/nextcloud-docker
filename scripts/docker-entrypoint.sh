@@ -52,6 +52,9 @@ fi
 if [ ! -f /config/nginx/dhparams.pem ]; then
   cp /defaults/dhparams.pem /config/nginx/dhparams.pem
 fi
+if [ ! -f /config/nginx/real-ip.conf ]; then
+  printf '# Optional real_ip_header / set_real_ip_from directives\n' > /config/nginx/real-ip.conf
+fi
 if [ ! -f /config/keys/cert.crt ] || [ ! -f /config/keys/cert.key ]; then
   openssl req -x509 -nodes -newkey rsa:2048 -days 3650 \
     -subj "/CN=localhost" \
