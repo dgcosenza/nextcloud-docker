@@ -4,6 +4,8 @@ ARG DEBIAN_BASE=debian:trixie-slim@sha256:8aa5a7bf5a1955bddbe7d74fcdd0b91ab30e74
 ARG NGINX_VERSION=1.30.8
 ARG NGX_BROTLI_COMMIT=53e0fb55f250f48fe80c0ddbf6c0f7103cdbaae1
 ARG NEXTCLOUD_VERSION=35.0.3
+ARG COMPOSER_VERSION=2.8.12
+ARG COMPOSER_SHA256=f446ea719708bb85fcbf4ef18def5d0515f1f9b4d703f6d820c9c1656e10a2f2
 
 # ---- Stage 1: compile official NGINX stable (HTTP/3 + ngx_brotli) ----
 FROM ${DEBIAN_BASE} AS nginx-builder
@@ -74,16 +76,24 @@ RUN set -eux; \
     make DESTDIR=/out install; \
     rm -rf /out/var/log/nginx
 
-# ---- Stage 2: download & SHA-256 verify official Nextcloud release ----
+# ---- Stage 2: download & SHA-256 verify official Nextcloud release, patch bundled deps ----
 FROM ${DEBIAN_BASE} AS nextcloud-src
 SHELL ["/bin/bash", "-o", "pipefail", "-c"]
 
 ARG NEXTCLOUD_VERSION
+ARG COMPOSER_VERSION
+ARG COMPOSER_SHA256
 ARG DEBIAN_FRONTEND=noninteractive
+
+COPY patches/webauthn-lib-backport.patch /tmp/webauthn-lib-backport.patch
+COPY patches/webauthn-lib-composer.json /tmp/webauthn-lib-composer.json
 
 RUN set -eux; \
     apt-get update; \
-    apt-get install -y --no-install-recommends bzip2 ca-certificates curl tar; \
+    apt-get -y upgrade; \
+    apt-get install -y --no-install-recommends \
+      bzip2 ca-certificates curl jq patch php8.4-cli php8.4-curl php8.4-mbstring \
+      php8.4-xml php8.4-zip tar unzip; \
     rm -rf /var/lib/apt/lists/*; \
     mkdir -p /app/www/src; \
     curl -fsSLo /tmp/nextcloud.tar.bz2 "https://download.nextcloud.com/server/releases/nextcloud-${NEXTCLOUD_VERSION}.tar.bz2"; \
@@ -94,7 +104,22 @@ RUN set -eux; \
     tar -xjf /tmp/nextcloud.tar.bz2 -C /app/www/src --strip-components=1; \
     rm -rf /app/www/src/updater /tmp/nextcloud.tar.bz2 /tmp/nextcloud.tar.bz2.sha256; \
     mkdir -p /app/www/src/data; \
-    chmod 0755 /app/www/src/occ
+    chmod 0755 /app/www/src/occ; \
+    curl -fsSLo /usr/local/bin/composer "https://getcomposer.org/download/${COMPOSER_VERSION}/composer.phar"; \
+    echo "${COMPOSER_SHA256}  /usr/local/bin/composer" | sha256sum -c -; \
+    chmod 0755 /usr/local/bin/composer; \
+    cp -a /app/www/src/3rdparty/web-auth/webauthn-lib /opt/webauthn-lib-patched; \
+    patch -d /opt/webauthn-lib-patched -p1 < /tmp/webauthn-lib-backport.patch; \
+    cp /tmp/webauthn-lib-composer.json /opt/webauthn-lib-patched/composer.json
+
+WORKDIR /app/www/src/3rdparty
+
+RUN set -eux; \
+    composer config repositories.webauthn-lib-patched '{"type":"path","url":"/opt/webauthn-lib-patched","options":{"symlink":false}}'; \
+    jq '.require["symfony/filesystem"] = "v7.4.23" | .require["symfony/http-foundation"] = "v7.4.23" | .require["symfony/routing"] = "v6.4.50" | .require["web-auth/webauthn-lib"] = "5.3.5"' composer.json > /tmp/3rdparty-composer.json; \
+    mv /tmp/3rdparty-composer.json composer.json; \
+    composer update --no-interaction --prefer-dist --with-all-dependencies \
+      symfony/filesystem symfony/http-foundation symfony/routing web-auth/webauthn-lib
 
 # ---- Stage 3: hardened Debian 13 (trixie-slim) Nextcloud runtime ----
 FROM ${DEBIAN_BASE} AS runtime
