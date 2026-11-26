@@ -4,6 +4,11 @@ All notable changes to the `dgcosenza/nextcloud` Debian 13 container packaging a
 
 The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Maintained by **Daniel G. Cosenza from FNX Labs**.
 
+## [Unreleased] — 2026-11-26
+
+### Fixed
+- Restored the Daily build to green by patching the bundled Nextcloud `3rdparty` Composer packages that the all-severity vulnerability gate correctly flagged: `symfony/filesystem` and `symfony/http-foundation` to `v7.4.23`, `symfony/routing` to `v6.4.50`, and `web-auth/webauthn-lib` to a patched build with the upstream `5.3.5` fix for `GHSA-gq4g-fpc9-vjfq` (4.x API preserved for Nextcloud compatibility). No scan gate was weakened.
+
 ---
 <!-- changelog:auto -->
 
