@@ -27,6 +27,29 @@ docker run -d --name "$NAME" \
   -v "${TMPDATA}:/data" \
   "$IMAGE"
 
+# Wait for the container's Docker HEALTHCHECK to report healthy
+HEALTHY=0
+HEALTH_STATUS="missing"
+for _ in $(seq 1 120); do
+  HEALTH_STATUS="$(docker inspect --format '{{.State.Health.Status}}' "$NAME" 2>/dev/null || echo "missing")"
+  if [ "$HEALTH_STATUS" = "healthy" ]; then
+    HEALTHY=1
+    break
+  fi
+  if [ "$HEALTH_STATUS" = "missing" ] || [ "$(docker inspect --format '{{.State.Running}}' "$NAME" 2>/dev/null || echo false)" != "true" ]; then
+    echo "ERROR: container exited before becoming healthy (health status=${HEALTH_STATUS})" >&2
+    docker logs "$NAME" >&2 || true
+    exit 1
+  fi
+  sleep 2
+done
+if [ "$HEALTHY" -ne 1 ]; then
+  echo "ERROR: container did not become healthy within 240s (status=${HEALTH_STATUS:-unknown})" >&2
+  docker logs "$NAME" >&2 || true
+  exit 1
+fi
+echo "Docker healthcheck: healthy"
+
 # Wait for /status.php to return valid Nextcloud JSON
 READY=0
 for _ in $(seq 1 60); do
