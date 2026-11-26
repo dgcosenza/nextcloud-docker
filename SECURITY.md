@@ -10,8 +10,8 @@ Only the latest daily build of `dgcosenza/nextcloud` packaging the latest offici
 
 Every build in GitHub Actions enforces:
 - Official SHA-256 verification of the Nextcloud release archive from `download.nextcloud.com`.
-- **Trivy** (`--ignore-unfixed`, severity `CRITICAL,HIGH`) blocking gate + table/JSON reports + SARIF upload to GitHub Code Scanning.
-- **Grype** (`--only-fixed`, severity cutoff `high`) blocking gate + persisted report artifact.
+- **Trivy** (`--ignore-unfixed`, all severities `UNKNOWN,LOW,MEDIUM,HIGH,CRITICAL`) blocking gate + table/JSON reports + SARIF upload to GitHub Code Scanning.
+- **Grype** (`--only-fixed --fail-on negligible`, all severities) blocking gate + persisted report artifact.
 - **Syft** SPDX SBOM (`sbom.spdx.json`) and build provenance artifacts.
 
 ## Reporting a Vulnerability
