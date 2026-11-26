@@ -47,7 +47,7 @@ A hardened, drop-in **Nextcloud** container image on **Debian 13 (`trixie-slim`)
 | Published multi-arch digest | `dgcosenza/nextcloud@sha256:a9ebb6eec412203c0ecb929ffa3e064b2cf24f4fb730e6b7026b0d8d46b6385a` |
 | GHCR mirror | `ghcr.io/dgcosenza/nextcloud@sha256:a9ebb6eec412203c0ecb929ffa3e064b2cf24f4fb730e6b7026b0d8d46b6385a` |
 | Supply chain | Cosign OIDC signed + SPDX & CycloneDX SBOM attestations + SLSA Build L3 provenance |
-| Security gate (Trivy + Grype on SBOM) | **0 fixable Critical/High** (72 upstream-unfixed) |
+| Security gate (Trivy + Grype on SBOM) | **0 fixable findings of any severity** (72 upstream-unfixed) |
 <!-- versions:end -->
 
 ---
@@ -177,8 +177,8 @@ gh attestation verify oci://ghcr.io/dgcosenza/nextcloud:latest --owner dgcosenza
 
 ## Security
 
-- **Vulnerability scan policy:** Every CI build runs **Trivy** (table, JSON, SARIF upload, blocking `--ignore-unfixed` gate) and **Grype** (`--only-fixed`, severity cutoff `high`, blocking gate), plus emits an **SPDX SBOM** (`sbom.spdx.json`) and provenance artifact.
-- **Current status:** **0 fixable Critical/High** vulnerabilities across Debian 13 OS packages, PHP 8.4, NGINX 1.30, and Nextcloud.
+- **Vulnerability scan policy (all severities with a fix):** Every CI build runs **Trivy** (table, JSON, SARIF upload, blocking `--ignore-unfixed` gate) and **Grype** (`--only-fixed`, severity cutoff `negligible`, blocking gate), plus emits an **SPDX SBOM** (`sbom.spdx.json`) and provenance artifact.
+- **Current status:** **0 fixable findings of any severity** vulnerabilities across Debian 13 OS packages, PHP 8.4, NGINX 1.30, and Nextcloud.
 - **Hardening:** `tini` PID 1, `no-new-privileges:true` compatible via `setpriv`, workers and background cron run as non-root `abc`, compilers excluded from runtime layer, built-in Nextcloud self-updater removed.
 - See [`SECURITY.md`](https://github.com/dgcosenza/nextcloud-docker/blob/main/SECURITY.md).
 
@@ -214,7 +214,7 @@ docker buildx build \
 
 1. **Upstream check:** Queries `nextcloud/server` latest stable release via the authenticated GitHub API, resolves latest stable NGINX from `nginx.org` and the `debian:trixie-slim` base digest, diffs against `versions.json`, and emits `upstream-changes.md`.
 2. **No-cache rebuild:** Rebuilds `linux/amd64` with `--no-cache` on schedule, verifies the Nextcloud tarball SHA-256, compiles NGINX + `ngx_brotli`, upgrades Debian 13 + PHP 8.4 packages, and emits an **SPDX SBOM** (`sbom.spdx.json`) and provenance artifact.
-3. **Vulnerability fix and gate:** Runs **Trivy** (table, JSON, SARIF upload, blocking `--ignore-unfixed` gate) and **Grype** (blocking `--only-fixed` gate, severity cutoff `high`), diffs findings against the previous scan, and retains reports for 90 days.
+3. **Vulnerability fix and gate:** Runs **Trivy** (table, JSON, SARIF upload, blocking `--ignore-unfixed` gate) and **Grype** (blocking `--only-fixed` gate, severity cutoff `negligible`), diffs findings against the previous scan, and retains reports for 90 days.
 4. **Smoke test:** Runs [`tests/smoke.sh`](https://github.com/dgcosenza/nextcloud-docker/blob/main/tests/smoke.sh) to verify fresh Nextcloud hydration, `tini` PID 1, non-root `abc` NGINX & PHP 8.4 FPM workers, HTTPS `/status.php`, `occ status`, and a negative closed-port healthcheck test.
 5. **Publish:** On non-PR builds when Docker Hub secrets are configured, pushes `latest`, `<version>`, `<version>-<YYYYMMDD>`, and `sha-<short>` tags to Docker Hub and records the immutable digest.
 6. **Automated documentation sync:** Commits updated `versions.json`, the README `Current Versions` block, and a dated `CHANGELOG.md` entry via `github-actions[bot]` with `[skip ci]` when content changes, then syncs the Docker Hub overview via `peter-evans/dockerhub-description`.
