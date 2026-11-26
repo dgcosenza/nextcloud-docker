@@ -26,9 +26,9 @@
   "base_digest": "sha256:8aa5a7bf5a1955bddbe7d74fcdd0b91ab30e74362a8b73af672b0481b35b44a0",
   "debian_version": "13.8",
   "build_date": "2026-11-26",
-  "built_at_utc": "2026-11-26T18:11:00Z",
-  "image_digest": "dgcosenza/nextcloud@sha256:03397dc3c1d2a9e71a2df98aa322be8703d282e7bb35d053420481718f18da6d",
-  "ghcr_digest": "ghcr.io/dgcosenza/nextcloud@sha256:03397dc3c1d2a9e71a2df98aa322be8703d282e7bb35d053420481718f18da6d",
+  "built_at_utc": "2026-11-26T22:39:38Z",
+  "image_digest": "dgcosenza/nextcloud@sha256:355845be275d91cfaf25cd799a3415553210888484dc69299a532559b579ca4f",
+  "ghcr_digest": "ghcr.io/dgcosenza/nextcloud@sha256:355845be275d91cfaf25cd799a3415553210888484dc69299a532559b579ca4f",
   "fixable_critical_high": 0,
   "unfixed_cves": [
     "CVE-2019-16224",
