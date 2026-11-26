@@ -116,10 +116,10 @@ WORKDIR /app/www/src/3rdparty
 
 RUN set -eux; \
     composer config repositories.webauthn-lib-patched '{"type":"path","url":"/opt/webauthn-lib-patched","options":{"symlink":false}}'; \
-    jq '.require["symfony/filesystem"] = "v7.4.23" | .require["symfony/http-foundation"] = "v7.4.23" | .require["symfony/routing"] = "v6.4.50" | .require["web-auth/webauthn-lib"] = "5.3.5"' composer.json > /tmp/3rdparty-composer.json; \
+    jq '.require["symfony/filesystem"] = "^7.4.23" | .require["symfony/http-foundation"] = "^7.4.23" | .require["symfony/mailer"] = "^7.4.24" | .require["symfony/routing"] = "^6.4.51" | .require["web-auth/webauthn-lib"] = "5.3.5"' composer.json > /tmp/3rdparty-composer.json; \
     mv /tmp/3rdparty-composer.json composer.json; \
     composer update --no-interaction --prefer-dist --with-all-dependencies \
-      symfony/filesystem symfony/http-foundation symfony/routing web-auth/webauthn-lib
+      symfony/filesystem symfony/http-foundation symfony/mailer symfony/routing web-auth/webauthn-lib
 
 # ---- Stage 3: hardened Debian 13 (trixie-slim) Nextcloud runtime ----
 FROM ${DEBIAN_BASE} AS runtime

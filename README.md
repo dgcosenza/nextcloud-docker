@@ -178,7 +178,7 @@ gh attestation verify oci://ghcr.io/dgcosenza/nextcloud:latest --owner dgcosenza
 ## Security
 
 - **Vulnerability scan policy (all severities with a fix):** Every CI build runs **Trivy** (table, JSON, SARIF upload, blocking `--ignore-unfixed` gate) and **Grype** (`--only-fixed`, severity cutoff `negligible`, blocking gate), plus emits an **SPDX SBOM** (`sbom.spdx.json`) and provenance artifact.
-- **Current status:** **0 fixable findings of any severity** vulnerabilities across Debian 13 OS packages, PHP 8.4, NGINX 1.30, and Nextcloud.
+- **Current status:** **0 fixable vulnerabilities of any severity** across Debian 13 OS packages, PHP 8.4, NGINX 1.30, and Nextcloud.
 - **Bundled PHP dependencies:** The official Nextcloud release ships a `3rdparty` Composer bundle. At build time the vulnerable bundled packages are patched to their published fixed versions: `symfony/filesystem` and `symfony/http-foundation` to `v7.4.23`, `symfony/routing` to `v6.4.50`, and `web-auth/webauthn-lib` to a patched build carrying the upstream `5.3.5` fix for `GHSA-gq4g-fpc9-vjfq`. The webauthn patch preserves the 4.x API that Nextcloud 35 uses (upstream 5.x removed classes that Nextcloud calls), and is applied with a checksum-pinned Composer build so the all-severity gates stay green without changing the application's behaviour.
 - **Hardening:** `tini` PID 1, `no-new-privileges:true` compatible via `setpriv`, workers and background cron run as non-root `abc`, compilers excluded from runtime layer, built-in Nextcloud self-updater removed.
 - See [`SECURITY.md`](https://github.com/dgcosenza/nextcloud-docker/blob/main/SECURITY.md).
