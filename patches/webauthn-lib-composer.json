@@ -1,0 +1,30 @@
+{
+    "name": "web-auth/webauthn-lib",
+    "version": "5.3.5",
+    "type": "library",
+    "license": "MIT",
+    "description": "API-compatible 4.x build with the upstream 5.3.5 security fix for GHSA-gq4g-fpc9-vjfq backported (Nextcloud 35 compatibility).",
+    "require": {
+        "php": ">=8.1",
+        "ext-json": "*",
+        "ext-openssl": "*",
+        "ext-mbstring": "*",
+        "lcobucci/clock": "^2.2|^3.0",
+        "paragonie/constant_time_encoding": "^2.6|^3.0",
+        "psr/clock": "^1.0",
+        "psr/event-dispatcher": "^1.0",
+        "psr/http-client": "^1.0",
+        "psr/http-factory": "^1.0",
+        "psr/log": "^1.0|^2.0|^3.0",
+        "spomky-labs/cbor-php": "^3.0",
+        "spomky-labs/pki-framework": "^1.0",
+        "symfony/uid": "^6.1|^7.0",
+        "symfony/deprecation-contracts": "^3.2",
+        "web-auth/cose-lib": "^4.2.3"
+    },
+    "autoload": {
+        "psr-4": {
+            "Webauthn\\": "src/"
+        }
+    }
+}

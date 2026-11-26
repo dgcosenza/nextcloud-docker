@@ -86,6 +86,7 @@ ARG COMPOSER_SHA256
 ARG DEBIAN_FRONTEND=noninteractive
 
 COPY patches/webauthn-lib-backport.patch /tmp/webauthn-lib-backport.patch
+COPY patches/webauthn-lib-composer.json /tmp/webauthn-lib-composer.json
 
 RUN set -eux; \
     apt-get update; \
@@ -109,8 +110,7 @@ RUN set -eux; \
     chmod 0755 /usr/local/bin/composer; \
     cp -a /app/www/src/3rdparty/web-auth/webauthn-lib /opt/webauthn-lib-patched; \
     patch -d /opt/webauthn-lib-patched -p1 < /tmp/webauthn-lib-backport.patch; \
-    jq '.version = "5.3.5"' /opt/webauthn-lib-patched/composer.json > /tmp/webauthn-composer.json; \
-    mv /tmp/webauthn-composer.json /opt/webauthn-lib-patched/composer.json
+    cp /tmp/webauthn-lib-composer.json /opt/webauthn-lib-patched/composer.json
 
 WORKDIR /app/www/src/3rdparty
 
