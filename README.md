@@ -42,10 +42,10 @@ A hardened, drop-in **Nextcloud** container image on **Debian 13 (`trixie-slim`)
 | PHP-FPM | `8.4.28` |
 | Base OS | `Debian 13.8 (trixie-slim)` |
 | Architectures | `linux/amd64, linux/arm64` |
-| Uncompressed size (per arch) | `amd64: 534.5 MB, arm64: 1493.3 MB` |
-| Last verified build (UTC) | `2026-11-25` |
-| Published multi-arch digest | `dgcosenza/nextcloud@sha256:a9ebb6eec412203c0ecb929ffa3e064b2cf24f4fb730e6b7026b0d8d46b6385a` |
-| GHCR mirror | `ghcr.io/dgcosenza/nextcloud@sha256:a9ebb6eec412203c0ecb929ffa3e064b2cf24f4fb730e6b7026b0d8d46b6385a` |
+| Uncompressed size (per arch) | `amd64: 534.7 MB, arm64: 1494.2 MB` |
+| Last verified build (UTC) | `2026-11-26` |
+| Published multi-arch digest | `dgcosenza/nextcloud@sha256:549857d8334698055439824c6fdd7a1695198cc324fda4a64b3a4e072236563f` |
+| GHCR mirror | `ghcr.io/dgcosenza/nextcloud@sha256:549857d8334698055439824c6fdd7a1695198cc324fda4a64b3a4e072236563f` |
 | Supply chain | Cosign OIDC signed + SPDX & CycloneDX SBOM attestations + SLSA Build L3 provenance |
 | Security gate (Trivy + Grype on SBOM) | **0 fixable findings of any severity** (72 upstream-unfixed) |
 <!-- versions:end -->
