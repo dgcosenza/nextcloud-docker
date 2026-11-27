@@ -19,7 +19,7 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Mai
 - Architectures verified: `linux/amd64, linux/arm64` (native smoke tests + Dive efficiency gate).
 - Upstream status: no new upstream release since previous build; refreshed base OS and dependencies.
 - Vulnerability gate: **0 fixable findings of any severity** in Trivy and Grype (SBOM scan) (74 upstream-unfixed).
-- Published multi-arch digest (Docker Hub + GHCR): `dgcosenza/nextcloud@sha256:b0c7ddff37fcf73cd5ef35550ca8a0d99c517f80e71e24e90c12be12832e5ec2` (Cosign OIDC signed + SPDX/CycloneDX SBOM + SLSA L3 provenance).
+- Published multi-arch digest (Docker Hub + GHCR): `dgcosenza/nextcloud@sha256:628f01326645cd8c7962d2190efaa975a095696bdfaa27090eeaff78509e9981` (Cosign OIDC signed + SPDX/CycloneDX SBOM + SLSA L3 provenance).
 ---
 
 ## [35.0.3] — 2026-11-26
