@@ -61,9 +61,9 @@ A hardened, drop-in **Nextcloud** container image on **Debian 13 (`trixie-slim`)
 | Base OS | `Debian 13.8 (trixie-slim)` |
 | Architectures | `linux/amd64, linux/arm64` |
 | Uncompressed size (per arch) | `amd64: 534.7 MB, arm64: 1494.2 MB` |
-| Last verified build (UTC) | `2026-11-27` |
-| Published multi-arch digest | `dgcosenza/nextcloud@sha256:628f01326645cd8c7962d2190efaa975a095696bdfaa27090eeaff78509e9981` |
-| GHCR mirror | `ghcr.io/dgcosenza/nextcloud@sha256:628f01326645cd8c7962d2190efaa975a095696bdfaa27090eeaff78509e9981` |
+| Last verified build (UTC) | `2026-11-28` |
+| Published multi-arch digest | `dgcosenza/nextcloud@sha256:96da65456bbeaf99e1d2d66a64d0764d26881bf4b9df1b6f684d5dc0a2c7dd44` |
+| GHCR mirror | `ghcr.io/dgcosenza/nextcloud@sha256:96da65456bbeaf99e1d2d66a64d0764d26881bf4b9df1b6f684d5dc0a2c7dd44` |
 | Supply chain | Cosign OIDC signed + SPDX & CycloneDX SBOM attestations + SLSA Build L3 provenance |
 | Security gate (Trivy + Grype on SBOM) | **0 fixable findings of any severity** (74 upstream-unfixed) |
 <!-- versions:end -->

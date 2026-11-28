@@ -12,6 +12,17 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Mai
 ---
 <!-- changelog:auto -->
 
+## [35.0.3] — 2026-11-28
+
+### Automated Daily Build
+- Verified components: Nextcloud `35.0.3`, NGINX `1.30.8`, PHP-FPM `8.4.28`, Base OS `Debian 13.8 (trixie-slim)`.
+- Architectures verified: `linux/amd64, linux/arm64` (native smoke tests + Dive efficiency gate).
+- Upstream status: no new upstream release since previous build; refreshed base OS and dependencies.
+- Vulnerability gate: **0 fixable findings of any severity** in Trivy and Grype (SBOM scan) (74 upstream-unfixed).
+- Published multi-arch digest (Docker Hub + GHCR): `dgcosenza/nextcloud@sha256:96da65456bbeaf99e1d2d66a64d0764d26881bf4b9df1b6f684d5dc0a2c7dd44` (Cosign OIDC signed + SPDX/CycloneDX SBOM + SLSA L3 provenance).
+
+---
+
 ## [35.0.3] — 2026-11-27
 
 ### Automated Daily Build
